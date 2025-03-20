@@ -4,3 +4,6 @@
 .correct{
     background-color: green;
 }
+.hidden{
+    display: none;
+}

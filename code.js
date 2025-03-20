@@ -1,60 +1,54 @@
-//Kysymykset ja vastaukset, joita hallitaan indeksin avulla.
-let questions = ['Kysymys 1', 'Kysymys 2', 'Kysymys 3', 'Kysymys 4'];
-let answers = ['yes', 'no', 'yes', 'no'];
+let questions = ['Kysymys 1', 'Kysymys 2', 'Kysymys 3'];
+let answers = ['yes', 'no', 'yes'];
 let index = 0;
 let points = 0;
 
-//Lisätään koko lomakkeeseen submit-event
-document.getElementById('questionform').addEventListener('submit', answer);
+//Haetaan kysymyselementti ja asetetaan ensimmäinen kysymys
+let questionElement = document.querySelector('#question');
+nextQuestion();
 
-//Kysymyselementtiä käytetään uuden kysymyksen näyttämiseen. Asetetaan aluksi ensimmäinen.
-let questionElement = document.getElementById('question');
-questionElement.textContent = questions[index];
+let form = document.querySelector('#questionform');
+form.addEventListener('submit', answer);
 
-/**
- * Funktio form-eventin käsittelyyn
- * @param {Event} e 
- */
-function answer(e){
-    e.preventDefault();
+//Kysymykseen vastaaminen
+function answer(event){
+    event.preventDefault();
 
-    //Disabloidaan hetkeksi vastausnappi, jottei sitä voida painaa ajastuksen aikana.
-    document.getElementById('answer').disabled = true;
-    
-    //Luodaan form data objekti form elementistä (hakee kaikki formin tiedot)
-    //CurrentTarget on elementti, johon eventti on kytketty (questionform)
-    let formdata = new FormData(e.currentTarget);
+    //Käyttäjä ei voi painaa nappia ennen seuraavaa kysymystä.
+    document.querySelector('#answer').disabled = true;
 
-    //Tarkistetaan radiobutton valinta ja verrataan sitä oikeaan vastukseen
-    //Vaihdetaan väriä CSS:n luokan avulla riippuen vastauksen oikeellisuudesta.
-    if( formdata.get('selection') ==  answers[index] ){
+    let formData = new FormData(form);
+    let selection = formData.get('selection');
+
+    //Tarkistetaan onko käyttäjän antama vastaus oikea
+    if(selection == answers[index]){
         points++;
         questionElement.classList.add('correct');
     }else{
         questionElement.classList.add('incorrect');
     }
 
-    //Päivitetään sivulle käyttäjän pisteet
-    document.getElementById('result').textContent = 
-        "Sinulla on  " + points + "/" + (answers.length) + " pistettä";
+    document.querySelector('#result').textContent = 
+        'Sinulla on nyt ' + points + '/' + questions.length + ' pistettä';
 
-    //Aloitetaan 3 sekunnin ajastin, jonka jälkeen asetetaan seuraava kysymys
-    setTimeout(nextQuestion, 3000);
-
-}
-
-/**
- * Seuraavan kysymyksen asettaminen
- */
-function nextQuestion(){
-
-    //Haetaan seuraavan indeksin kysymys, jos kysymykset eivät ole loppuneet.
+    //Siirrytään seuraavaan kysymykseen
     index++;
-    if(index <= questions.length-1){
-        questionElement.textContent = questions[index];
-    }
 
-    //Resetoidaan muotoilut ja asetetaan nappi takaisin painettavaksi.
-    questionElement.classList.remove('correct', 'incorrect');
-    document.getElementById('answer').disabled = false;
+    //4 sek viive ennen seuraavaa kysymystä
+    //Voitaisiin toteuttaa myös erillisellä "next question" -painikkeella
+    setTimeout(nextQuestion, 4000);
 }
+
+//Asetetaan uusi kysymys näkyviin
+function nextQuestion(){
+    if(index >= questions.length){
+        document.querySelector('#result').textContent = 
+            'Peli loppui ja sait yhteensä ' + points + '/' + questions.length + ' pistettä';
+        form.classList.add('hidden');
+    }else{
+        questionElement.textContent = questions[index];
+        questionElement.classList.remove('correct', 'incorrect');
+        document.querySelector('#answer').disabled = false;
+    }
+    
+} 
